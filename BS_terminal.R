@@ -100,69 +100,6 @@ LL2=function(b1, b2, b3, b4, b01, b02, phi,mu,theta,x1, x2, y1, y2, s1,s2,id, N)
 
 
   out<-function(idx,n.sim){
-  #setwd("/storage/work/m/mjl6416/jointmodeling/")
-  #dyn.load("/storage/work/m/mjl6416/jointmodeling/01code/copula_dep.so") ##load c function##
-  #setwd("/Users/mengluliang/Dropbox/biostatisitcs_PSU/RA/2020Spring/BayesianJointModel/")
-  # idx<-4  ###scenario index###
-  ##idx=1 for the scenario with sample size n=100 and theta=1,J=100,rho=0.1; idx=2 for the scenario with sample size n=100 and theta=1,J=1000,rho=0.1 ##
-  ##idx=3 for the scenario with sample size n=100 and theta=1,J=10000 ,rho=0.1; idx=4 for the scenario with sample size n=100 and theta=1.5,J=100,rho=0.1 ##
-  ##idx=5 for the scenario with sample size n=100 and theta=1.5 ,J=1000,rho=0.1 ; idx=6 for the scenario with sample size n=100 and theta=1.5,J=10000,rho=0.1 ##
-  ##idx=7 for the scenario with sample size n=100 and theta=2 ,J=100,rho=0.1 ; idx=8 for the scenario with sample size n=100 and theta=2,J=1000,rho=0.1 ##
-  ##idx=9 for the scenario with sample size n=100 and theta=2,J=10000,rho=0.1 ;
-  
-  ## idx=10 for the scenario with sample size n=200 and theta=1,J=100,rho=0.1 
-  ##idx=11 for the scenario with sample size n=200 and theta=1 ,J=1000,rho=0.1 ; idx=12 for the scenario with sample size n=200 and theta=1,J=10000,rho=0.1 ##
-  ##idx=13 for the scenario with sample size n=200 and theta=1.5 ,J=100,rho=0.1 ; idx=14 for the scenario with sample size n=200 and theta=1.5,J=1000,rho=0.1 ##
-  ##idx=15 for the scenario with sample size n=200 and theta=1.5 ,J=10000,rho=0.1 ; idx=16 for the scenario with sample size n=200 and theta=2,J=100,rho=0.1 ##
-  ##idx=17 for the scenario with sample size n=200 and theta=2 ,J=1000,rho=0.1 ; idx=18 for the scenario with sample size n=200 and theta=2,J=10000,rho=0.1 ##
-  
-  ## idx=19 for the scenario with sample size n=400 and theta=1,J=100,rho=0.1 
-  ##idx=20 for the scenario with sample size n=400 and theta=1 ,J=1000,rho=0.1 ; idx=21 for the scenario with sample size n=400 and theta=1,J=10000,rho=0.1 ##
-  ##idx=22 for the scenario with sample size n=400 and theta=1.5 ,J=100,rho=0.1 ; idx=23 for the scenario with sample size n=400 and theta=1.5,J=1000,rho=0.1 ##
-  ##idx=24 for the scenario with sample size n=400 and theta=1.5 ,J=10000,rho=0.1 ; idx=25 for the scenario with sample size n=400 and theta=2,J=100,rho=0.1 ##
-  ##idx=26 for the scenario with sample size n=400 and theta=2 ,J=1000,rho=0.1 ; idx=27 for the scenario with sample size n=400 and theta=2,J=10000,rho=0.1 ##
-  
-  
-  ##idx=28 for the scenario with sample size n=100 and theta=1,J=100,rho=0.3; idx=29 for the scenario with sample size n=100 and theta=1,J=1000,rho=0.3 ##
-  ##idx=30 for the scenario with sample size n=100 and theta=1,J=10000 ,rho=0.3; idx=31 for the scenario with sample size n=100 and theta=1.5,J=100,rho=0.3 ##
-  ##idx=32 for the scenario with sample size n=100 and theta=1.5 ,J=1000,rho=0.3 ; idx=33 for the scenario with sample size n=100 and theta=1.5,J=10000,rho=0.3 ##
-  ##idx=34 for the scenario with sample size n=100 and theta=2 ,J=100,rho=0.3 ; idx=35 for the scenario with sample size n=100 and theta=2,J=1000,rho=0.3 ##
-  ##idx=36 for the scenario with sample size n=100 and theta=2,J=10000,rho=0.3 ; 
-  
-  ##idx=37 for the scenario with sample size n=200 and theta=1,J=100,rho=0.3 ##
-  ##idx=38 for the scenario with sample size n=200 and theta=1 ,J=1000,rho=0.3 ; 
-  ##idx=39 for the scenario with sample size n=200 and theta=1,J=10000,rho=0.3 ##
-  ##idx=40 for the scenario with sample size n=200 and theta=1.5 ,J=100,rho=0.3 ; idx=41 for the scenario with sample size n=200 and theta=1.5,J=1000,rho=0.3 ##
-  ##idx=42 for the scenario with sample size n=200 and theta=1.5 ,J=10000,rho=0.3 ; idx=43 for the scenario with sample size n=200 and theta=2,J=100,rho=0.3 ##
-  ##idx=44 for the scenario with sample size n=200 and theta=2 ,J=1000,rho=0.3 ; idx=45 for the scenario with sample size n=200 and theta=2,J=10000,rho=0.3 ##
-  
-  ##idx=46 for the scenario with sample size n=400 and theta=1,J=100,rho=0.3 ##
-  ##idx=47 for the scenario with sample size n=400 and theta=1 ,J=1000,rho=0.3 ; 
-  ##idx=48 for the scenario with sample size n=400 and theta=1,J=10000,rho=0.3 ##
-  ##idx=49 for the scenario with sample size n=400 and theta=1.5 ,J=100,rho=0.3 ; idx=50 for the scenario with sample size n=200 and theta=1.5,J=1000,rho=0.3 ##
-  ##idx=51 for the scenario with sample size n=400 and theta=1.5 ,J=10000,rho=0.3 ; idx=52 for the scenario with sample size n=200 and theta=2,J=100,rho=0.3 ##
-  ##idx=53 for the scenario with sample size n=400 and theta=2 ,J=1000,rho=0.3 ; idx=54  for the scenario with sample size n=200 and theta=2,J=10000,rho=0.3 ##
-  
-  
-  ##idx=55 for the scenario with sample size n=100 and theta=1,J=100,rho=0.5; idx=56 for the scenario with sample size n=100 and theta=1,J=1000,rho=0.5 ##
-  ##idx=57 for the scenario with sample size n=100 and theta=1,J=10000 ,rho=0.5; idx=58 for the scenario with sample size n=100 and theta=1.5,J=100,rho=0.5 ##
-  ##idx=59 for the scenario with sample size n=100 and theta=1.5 ,J=1000,rho=0.5 ; idx=60 for the scenario with sample size n=100 and theta=1.5,J=10000,rho=0.5 ##
-  ##idx=61 for the scenario with sample size n=100 and theta=2 ,J=100,rho=0.5 ; idx=62 for the scenario with sample size n=100 and theta=2,J=1000,rho=0.5 ##
-  ##idx=63 for the scenario with sample size n=100 and theta=2,J=10000,rho=0.5 ; 
-  
-  ##idx=64 for the scenario with sample size n=200 and theta=1,J=100,rho=0.5 ##
-  ##idx=65 for the scenario with sample size n=200 and theta=1 ,J=1000,rho=0.5 ; 
-  ##idx=66 for the scenario with sample size n=200 and theta=1,J=10000,rho=0.5 ##
-  ##idx=67 for the scenario with sample size n=200 and theta=1.5 ,J=100,rho=0.5 ; idx=68 for the scenario with sample size n=200 and theta=1.5,J=1000,rho=0.5 ##
-  ##idx=69 for the scenario with sample size n=200 and theta=1.5 ,J=10000,rho=0.5 ; idx=70 for the scenario with sample size n=200 and theta=2,J=100,rho=0.5 ##
-  ##idx=71 for the scenario with sample size n=200 and theta=2 ,J=1000,rho=0.5 ; idx=72 for the scenario with sample size n=200 and theta=2,J=10000,rho=0.5 ##
-  
-  ##idx=73 for the scenario with sample size n=400 and theta=1,J=100,rho=0.5 ##
-  ##idx=74 for the scenario with sample size n=400 and theta=1 ,J=1000,rho=0.5 ; 
-  ##idx=75 for the scenario with sample size n=400 and theta=1,J=10000,rho=0.5 ##
-  ##idx=76 for the scenario with sample size n=400 and theta=1.5 ,J=100,rho=0.5 ; idx=77 for the scenario with sample size n=400 and theta=1.5,J=1000,rho=0.5 ##
-  ##idx=78 for the scenario with sample size n=400 and theta=1.5 ,J=10000,rho=0.5 ; idx=79 for the scenario with sample size n=400 and theta=2,J=100,rho=0.5 ##
-  ##idx=80 for the scenario with sample size n=400 and theta=2 ,J=1000,rho=0.5 ; idx=81  for the scenario with sample size n=400 and theta=2,J=10000,rho=0.5 ##
   
   
   n_patient_s=rep(rep(c(100,200,400),each=9),3) ##possible values for sample size, which is set as 100 ,200 or 400##
