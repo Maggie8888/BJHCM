@@ -10,6 +10,8 @@ require(prodlim)
 require(doParallel)
 require(Rcpp)
 require(RcppArmadillo)
+require(frailtypack)
+
 ####################################################################
 #####the function is for log likelihood function of the data########
 ### function argurments: #######
@@ -202,9 +204,7 @@ out<-function(idx,n.sim){
   b02_sample=rep(b02,n_sample)
   sigma_sample=rep(0.01,n_sample)
   theta_sample=rep(mu,n_sample) 
-  sourceCpp("/storage/work/m/mjl6416/jointmodeling/01code/copula_joint_model.cpp")
-  #sourceCpp("/Users/mengluliang/Dropbox/biostatisitcs_PSU/RA/2020Spring/BayesianJointModel/01code/copula_joint_model.cpp")
-  
+   
   scale=c(0.1,0.1,0.1,0.1,0.1,0.1,0.01,0.1) ###step size of MCMC###
   
   
@@ -238,8 +238,7 @@ out<-function(idx,n.sim){
   theta_sample=rep(na.omit(c(t(gamma))),n_sample)
   sigma_epsilon_sample=rep(sigma_epsilon,n_sample)
   mu_sample=rep(theta_est1,n_sample)
-  sourceCpp("/storage/work/m/mjl6416/jointmodeling/01code/copula_dep.cpp")
-  #sourceCpp("/Users/mengluliang/Dropbox/biostatisitcs_PSU/RA/2020Spring/BayesianJointModel/01code/copula_dep.cpp")
+  
   
   scale=c(0.1,0.1,0.1,0.1,0.1,0.1,0.01,0.1,0.01)
   
@@ -364,6 +363,63 @@ out<-function(idx,n.sim){
   
   main_predict2=data.frame(do.call("rbind",main_predict2))
   theta_sample=rep(na.omit(c(t(theta_predict2))),n_sample)
+  
+  
+  
+  
+  ##########prediction using SFM #################
+  
+  modJoint.gap<- frailtyPenal(Surv(y2,s2) ~ cluster(id) +
+    x1+x2+terminal(s3),formula.terminalEvent = ~ x1+x2,data = main, n.knots = 8, kappa = c(2,3))
+  
+  
+  b1_est_SF<-modJoint.gap$coef[1]
+  b2_est_SF<-modJoint.gap$coef[2]
+  modJoint.gap<- frailtyPenal(Surv(y2_2,s2_2) ~ cluster(id) +
+   x1+x2+terminal(s3_2),formula.terminalEvent = ~ x1+x2,data = main_predict2, n.knots = 8, kappa = c(2,3))
+  
+phi_est_SF<-modJoint.gap$alpha
+  y1<-vector()
+  s3<-vector()
+  prediction<-vector()
+  for (i in unique(main_predict2$id)){
+    ni<-dim(main_predict2[main_predict2$id==i,])[1]
+    y1[i]<-max(main_predict2[main_predict2$id==i,]$y1)
+   s3[i]<-main_predict2[main_predict2$id==i,]$s3[ni]
+    
+  }
+  t_s=c(0.03,0.06,0.09)
+  bs_t_terminal_SF<-list()
+  bs_t_terminal_SF[[1]]<-matrix(c(rep(0,16)),nrow=8,ncol=2)
+  bs_t_terminal_SF[[2]]<-matrix(c(rep(0,10)),nrow=5,ncol=2)
+  bs_t_terminal_SF[[3]]<-matrix(c(rep(0,4)),nrow=2,ncol=2)
+  for(t_prime in t_s){
+    
+    t_f=seq(t_prime,0.10,0.01)
+    idd<-which(t_s==t_prime)
+    for (t_final in t_f){
+      phi_est_SF=rnorm(1,phi_est_SF,0.1)
+      for(k in 1:length(unique(main_predict2$id))){
+        
+        main_predict_p2=main_predict2[main_predict2$id==k,]
+        
+        ############## using existing function in frailtypack package ####################
+        set.seed(n.sim*100)
+        
+        
+        # pred<-prediction(modJoint.gap, main_predict, t =t_prime-0.01, window =seq(0.01, 0.1, 0.01), MC.sample = 60)
+        prediction[k]<-exp(-t_final*exp(b1_est_SF*main_predict_p2$x1[1]+b2_est_SF*main_predict_p2$x2[1]+phi_est_SF))  
+      }
+      
+      
+      
+      s_score_terminal_SF=sbrier(Surv(y1,s1),prediction,btime =t_final)
+      bs_t_terminal_SF[[idd]]=rbind(c(t_final,s_score_terminal_SF),bs_t_terminal_SF[[idd]])
+      
+    }
+  }
+  
+  
   ##########################################################################
   ##########begin prediction and plot the curve of the Brier Scores ########
   ##########################################################################
@@ -371,6 +427,7 @@ out<-function(idx,n.sim){
   ##########begin prediction and plot the curve of the Brier Scores ########
   ##########################################################################
   
+  ######## estimation using SFM #############
   
   t_s=c(0.03,0.06,0.09)
   bs_t<-list()
@@ -459,7 +516,9 @@ out<-function(idx,n.sim){
         phiN_est=mean(unlist(phiN_sample_post))
         #predict2[k]=exp(-t_final*exp(b1_est*main_predict_p2$x1[1]+b2_est*main_predict_p2$x2[1]+b01_est+phiN_est2))  
         predict_terminal[k]=exp(-t_final*exp(b1_est1*main_predict_p2$x1[1]+b2_est1*main_predict_p2$x2[1]+b01_est1+phiN_est))  
-      }
+     
+        
+        }
       
       predict2=na.omit(predict2)
       censor2=1-na.omit(s1_t2)
@@ -470,41 +529,54 @@ out<-function(idx,n.sim){
       censor=1-na.omit(s1_t)
       s1_t=na.omit(s1_t)
       y1_t=na.omit(y1_t)
-      #predict_time=seq(0.1,max(y1_t),0.01)
-      #predict_time2=seq(0.1,max(y1_t2),0.01)
+      
+      
+      
       s_score_terminal=sbrier(Surv(y1_t,s1_t),as.vector(predict_terminal[1:length(y1_t)]),btime=t_final)
       s_score=sbrier(Surv(y1_t2,s1_t2),as.vector(predict2[1:length(y1_t2)]),btime =t_final)
-      
       bs_t_terminal[[idd]]=rbind(c(t_final,s_score_terminal),bs_t_terminal[[idd]])
       bs_t[[idd]]=rbind(c(t_final,s_score),bs_t[[idd]])
-      
       
     }
     
   }
   
   
-  return(list(bs_t,bs_t_terminal))
+  return(list(bs_t,bs_t_terminal,bs_t_terminal_SF))
 }
 
 
 
 
 ########################################################################
+library(foreach,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.5/")
+library(pcaPP,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.5/")
+library(iterators,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.5/")
+library(doMC,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.5/")
+library(ipred,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.5/")
+library(survival,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.5/")
+library(gsl,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.5/")
+library(copula,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.5/")
+library(foreach,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.5/")
+library(doParallel,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.5/")
+library(Rcpp,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.5/")
+library(RcppArmadillo,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.5/")
+library(frailtypack,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.5/")
+sourceCpp("/storage/work/m/mjl6416/jointmodeling/01code/copula_joint_model.cpp")
+sourceCpp("/storage/work/m/mjl6416/jointmodeling/01code/copula_dep.cpp")
 
-
-args=(commandArgs(TRUE))
-job = as.numeric(gsub("\\job=", "", args))
-idx<-job
+idx<-63
 numCores <- 20
 registerDoParallel(numCores)
-nsim<-60
+nsim<-100
 result<- foreach(n.sim=1:nsim,.errorhandling = "remove") %dopar% {
   out(idx,n.sim)
 }
 setwd("/storage/work/m/mjl6416/jointmodeling/03results_100")
-saveRDS(result,paste0("100_",idx,".rds"))
+saveRDS(result,paste0("100_WSF_",idx,".rds"))
 #BS(idx)
+
+
 
 
 
