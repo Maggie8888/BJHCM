@@ -2,4 +2,7 @@
 
 export()
 export(BS_JHCM)
+export(BS_TVJHCM)
+export(BS_figure)
+export(BS_frank_TVJHCM)
 export(Beta_est_sim)
